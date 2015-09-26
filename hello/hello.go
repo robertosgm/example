@@ -18,10 +18,27 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/robertosgm/example/stringutil"
+	"net/http"
+	"log"
+	"html"
+	"crypto/tls"
 )
 
+
+func barHandler(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, stringutil.Reverse("!selpmaxe oG ,olleH") + "%q", html.EscapeString(r.URL.Path))
+}
+
 func main() {
-	fmt.Println(stringutil.Reverse("!selpmaxe oG ,olleH"))
+	
+	cert, err := tls.LoadX509KeyPair("./cert.pem", "./key.pem")
+	log.Printf("Error: %s", err)
+	config := tls.Config{Certificates: []tls.Certificate{cert},ClientAuth: tls.RequireAndVerifyAnyClientCert}
+	s := &http.Server{
+		Addr:           ":4443",
+		TLSConfig:	&config,
+	}
+	http.Handle("/bar", http.HandlerFunc(barHandler))
+	log.Fatal(s.ListenAndServeTLS("",""))
 }
