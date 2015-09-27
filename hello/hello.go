@@ -23,22 +23,38 @@ import (
 	"log"
 	"html"
 	"crypto/tls"
+	"crypto/x509"
+	"io/ioutil"
 )
 
 
 func barHandler(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, stringutil.Reverse("!selpmaxe oG ,olleH") + "%q", html.EscapeString(r.URL.Path))
+        fmt.Fprintf(w, stringutil.Reverse("!selpmaxe oG ,olleH")+ "\n")
+        fmt.Fprintf(w, "%q" + ":" + "%q" + "\n", r.Method, r.Proto)
+        fmt.Fprintf(w, "%q" + ":" + "%q" + "\n", html.EscapeString(r.URL.Path), r.RemoteAddr)
 }
 
 func main() {
-	
-	cert, err := tls.LoadX509KeyPair("./cert.pem", "./key.pem")
-	log.Printf("Error: %s", err)
-	config := tls.Config{Certificates: []tls.Certificate{cert},ClientAuth: tls.RequireAndVerifyAnyClientCert}
+	caCert, err := ioutil.ReadFile("./rootCA.pem")
+	if err != nil {
+		log.Fatal(err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)	
+	cert, err := tls.LoadX509KeyPair("./server.crt", "./server.key")
+	if err != nil {
+		log.Fatal(err)
+	}
+	config := tls.Config{
+		Certificates: []tls.Certificate{cert},
+		ClientAuth: tls.RequireAndVerifyClientCert,
+		ClientCAs: caCertPool,
+	}
+
 	s := &http.Server{
 		Addr:           ":4443",
 		TLSConfig:	&config,
 	}
-	http.Handle("/bar", http.HandlerFunc(barHandler))
+	http.Handle("/", http.HandlerFunc(barHandler))
 	log.Fatal(s.ListenAndServeTLS("",""))
 }
