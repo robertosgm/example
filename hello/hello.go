@@ -17,21 +17,20 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
-	"github.com/robertosgm/example/stringutil"
-	"net/http"
-	"log"
-	"html"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
+	"github.com/robertosgm/example/stringutil"
+	"html"
 	"io/ioutil"
+	"log"
+	"net/http"
 )
 
-
 func barHandler(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, stringutil.Reverse("!selpmaxe oG ,olleH")+ "\n")
-        fmt.Fprintf(w, "%q" + ":" + "%q" + "\n", r.Method, r.Proto)
-        fmt.Fprintf(w, "%q" + ":" + "%q" + "\n", html.EscapeString(r.URL.Path), r.RemoteAddr)
+	fmt.Fprintf(w, stringutil.Reverse("!selpmaxe oG ,olleH")+"\n")
+	fmt.Fprintf(w, "%q"+":"+"%q"+"\n", r.Method, r.Proto)
+	fmt.Fprintf(w, "%q"+":"+"%q"+"\n", html.EscapeString(r.URL.Path), r.RemoteAddr)
 }
 
 func main() {
@@ -40,21 +39,21 @@ func main() {
 		log.Fatal(err)
 	}
 	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)	
+	caCertPool.AppendCertsFromPEM(caCert)
 	cert, err := tls.LoadX509KeyPair("./server.crt", "./server.key")
 	if err != nil {
 		log.Fatal(err)
 	}
 	config := tls.Config{
 		Certificates: []tls.Certificate{cert},
-		ClientAuth: tls.RequireAndVerifyClientCert,
-		ClientCAs: caCertPool,
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientCAs:    caCertPool,
 	}
 
 	s := &http.Server{
-		Addr:           ":4443",
-		TLSConfig:	&config,
+		Addr:      ":4443",
+		TLSConfig: &config,
 	}
 	http.Handle("/", http.HandlerFunc(barHandler))
-	log.Fatal(s.ListenAndServeTLS("",""))
+	log.Fatal(s.ListenAndServeTLS("", ""))
 }
