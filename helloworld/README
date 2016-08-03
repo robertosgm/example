@@ -1,0 +1,11 @@
+Build my app: docker build -t my-golang-app .
+Run my app: docker run -it --rm --name my-running-app my-golang-app
+Compile app and get binary: docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp golang:1.6 go build -v
+Cross compile: docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp -e GOOS=windows -e GOARCH=386 golang:1.6 go build -v
+Cross compile multiple platforms: 
+$ docker run --rm -it -v "$PWD":/usr/src/myapp -w /usr/src/myapp golang:1.6 bash
+$ for GOOS in darwin linux; do
+>   for GOARCH in 386 amd64; do
+>     go build -v -o myapp-$GOOS-$GOARCH
+>   done
+> done
